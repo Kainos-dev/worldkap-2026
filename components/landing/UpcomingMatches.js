@@ -139,7 +139,7 @@ export default function UpcomingMatches({ matches }) {
                         </p>
                     </div>
                     <Link
-                        href="/matches"
+                        href="/leagues"
                         className="hidden sm:inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-white transition-colors duration-200 shrink-0 pb-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white rounded"
                     >
                         Ver todos

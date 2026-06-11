@@ -1,7 +1,8 @@
 "use client"
 import Link from "next/link"
 import Image from "next/image"
-import worldKapLogo from "@/public/worldKap_logo.png"
+/* import worldKapLogo from "@/public/worldKap_logo.png" */
+import worldKapLogo from "@/public/logoprode4.png"
 
 export default function Hero({ isLoggedIn }) {
     return (
@@ -27,7 +28,7 @@ export default function Hero({ isLoggedIn }) {
             <div className="relative z-10 flex flex-col items-center text-center gap-8 max-w-3xl w-full">
 
                 {/* Logo */}
-                
+
 
                 {/* Eyebrow */}
                 <div className="flex items-center gap-3">
@@ -62,8 +63,8 @@ export default function Hero({ isLoggedIn }) {
                     alt="WorldKap 2026"
                     width={400}
                     height={400}
-                    className="w-20 h-20 sm:w-125 sm:h-125 object-contain"
-                    priority // importante: está above the fold
+                    className="w-40 h-40 md:w-125 md:h-125 object-contain"
+                    priority
                 />
 
                 {/* Descriptor */}
