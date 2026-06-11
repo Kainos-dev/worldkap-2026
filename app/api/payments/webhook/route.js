@@ -3,47 +3,73 @@ import { prisma } from "@/lib/prisma"
 import { Payment } from "mercadopago"
 import client from "@/lib/mercadopago"
 
+export async function GET() {
+    return NextResponse.json({ ok: true })
+}
+
 export async function POST(request) {
     console.log("🔔 Webhook POST recibido")
 
     try {
-        const body = await request.text() // cambiá request.json() por request.text()
+        const { searchParams } = new URL(request.url)
+        const body = await request.text()
         console.log("📦 Body raw:", body)
+        console.log("📦 Query params:", Object.fromEntries(searchParams))
 
-        await fetch("https://webhook.site/b1c7dfa9-7b74-4ae4-89d9-9425f33073c8", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                body: JSON.parse(body),
-                env: {
-                    hasAccessToken: !!process.env.MP_ACCESS_TOKEN,
-                    tokenStart: process.env.MP_ACCESS_TOKEN?.substring(0, 10),
-                    hasDB: !!process.env.DATABASE_URL,
-                }
-            })
-        }).catch(() => { })
+        let data = {}
+        try { data = JSON.parse(body) } catch (_) { }
 
-        const data = JSON.parse(body)
-        console.log("✅ Body parseado:", data.type)
+        const type = data.type ?? data.topic ?? searchParams.get("topic")
+        const mpPaymentId = data.data?.id ?? searchParams.get("id")
 
-        if (data.type !== "payment") {
-            console.log("⏭️ Ignorando tipo:", data.type)
+        console.log("📋 type resuelto:", type)
+        console.log("💳 Payment ID resuelto:", mpPaymentId)
+
+        if (type !== "payment" && type !== "merchant_order") {
+            console.log("⏭️ Ignorando tipo:", type)
             return NextResponse.json({ received: true })
         }
-
-        const mpPaymentId = data.data?.id
-        console.log("💳 Payment ID de MP:", mpPaymentId)
 
         if (!mpPaymentId) {
+            console.log("⚠️ Sin payment ID")
             return NextResponse.json({ received: true })
         }
 
+        // Si es merchant_order, resolver el payment ID real
+        let finalPaymentId = mpPaymentId
+        if (type === "merchant_order") {
+            console.log("🔍 Consultando merchant_order:", mpPaymentId)
+            try {
+                const orderRes = await fetch(
+                    `https://api.mercadolibre.com/merchant_orders/${mpPaymentId}`,
+                    { headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` } }
+                )
+                const order = await orderRes.json()
+                console.log("📦 Payments en orden:", JSON.stringify(order.payments))
+
+                const approvedPayment = order.payments?.find(p => p.status === "approved")
+                    ?? order.payments?.[order.payments.length - 1]
+
+                if (!approvedPayment) {
+                    console.log("⚠️ Sin payments en la orden todavía")
+                    return NextResponse.json({ received: true })
+                }
+
+                finalPaymentId = approvedPayment.id
+                console.log("💳 Payment ID real:", finalPaymentId)
+            } catch (e) {
+                console.error("❌ Error consultando merchant_order:", e)
+                return NextResponse.json({ received: true })
+            }
+        }
+
+        // Consultar el pago a MP
         const paymentApi = new Payment(client)
         console.log("🔍 Consultando pago a MP...")
 
         let mpPayment
         try {
-            mpPayment = await paymentApi.get({ id: mpPaymentId })
+            mpPayment = await paymentApi.get({ id: finalPaymentId })
             console.log("✅ Respuesta MP:", JSON.stringify({
                 id: mpPayment.id,
                 status: mpPayment.status,
@@ -78,7 +104,7 @@ export async function POST(request) {
         console.log("🗄️ Payment en DB:", payment ? payment.id : "NO ENCONTRADO")
 
         if (!payment) {
-            console.log("⚠️ Pago no encontrado en DB con external_reference:", externalReference)
+            console.log("⚠️ Pago no encontrado en DB:", externalReference)
             return NextResponse.json({ received: true })
         }
 
@@ -89,7 +115,7 @@ export async function POST(request) {
                 where: { id: payment.id },
                 data: {
                     status: "APPROVED",
-                    mpPaymentId: mpPaymentId.toString(),
+                    mpPaymentId: finalPaymentId.toString(),
                 },
             })
 
@@ -125,7 +151,7 @@ export async function POST(request) {
                 where: { id: payment.id },
                 data: {
                     status: "REJECTED",
-                    mpPaymentId: mpPaymentId.toString(),
+                    mpPaymentId: finalPaymentId.toString(),
                 },
             })
             console.log("❌ Pago rechazado")
