@@ -7,6 +7,8 @@ import client from "@/lib/mercadopago"
 const ENTRY_AMOUNT = 5000
 
 export async function POST() {
+    const isProduction = process.env.MP_ENV === "production"
+
     try {
         const session = await auth()
 
@@ -60,9 +62,7 @@ export async function POST() {
                     },
                 ],
                 payer: {
-                    email: process.env.NODE_ENV === "production"
-                        ? user?.email
-                        : process.env.MP_TEST_PAYER_EMAIL,
+                    email: isProduction ? user?.email : process.env.MP_TEST_PAYER_EMAIL,
                 },
                 back_urls: {
                     success: `${process.env.NEXT_PUBLIC_APP_URL}/leagues/join-general/success`,
@@ -78,9 +78,7 @@ export async function POST() {
         /* console.log("MP Response:", JSON.stringify(response, null, 2)) */
 
         return NextResponse.json({
-            url: process.env.NODE_ENV === "production"
-                ? response.init_point
-                : response.sandbox_init_point
+            url: isProduction ? response.init_point : response.sandbox_init_point
         })
     } catch (error) {
         console.error("Error creando preferencia MP:", error)
