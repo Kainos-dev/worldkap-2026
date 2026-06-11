@@ -10,7 +10,7 @@ export async function POST(request) {
         const body = await request.text() // cambiá request.json() por request.text()
         console.log("📦 Body raw:", body)
 
-        await fetch("https://webhook.site/1d47dd0e-1b26-4cfd-bce0-cc3d90430a17", {
+        await fetch("https://webhook.site/b1c7dfa9-7b74-4ae4-89d9-9425f33073c8", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

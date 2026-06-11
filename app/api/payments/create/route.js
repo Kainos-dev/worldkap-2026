@@ -43,12 +43,12 @@ export async function POST() {
         const preference = new Preference(client)
 
         // Justo antes del preference.create(...)
-        /* console.log("MP Preference body:", JSON.stringify({
-            payer_email: process.env.NODE_ENV === "production" ? user?.email : process.env.MP_TEST_PAYER_EMAIL,
+        console.log("MP Preference body:", JSON.stringify({
+            payer_email: isProduction ? user?.email : process.env.MP_TEST_PAYER_EMAIL,
             access_token: process.env.MP_ACCESS_TOKEN?.slice(0, 30) + "...",
             node_env: process.env.NODE_ENV,
             app_url: process.env.NEXT_PUBLIC_APP_URL,
-        }, null, 2)) */
+        }, null, 2))
 
         const response = await preference.create({
             body: {
@@ -75,7 +75,7 @@ export async function POST() {
             },
         })
 
-        /* console.log("MP Response:", JSON.stringify(response, null, 2)) */
+        console.log("MP Response:", JSON.stringify(response, null, 2))
 
         return NextResponse.json({
             url: isProduction ? response.init_point : response.sandbox_init_point
