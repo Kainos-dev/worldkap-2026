@@ -4,47 +4,74 @@ import { Payment } from "mercadopago"
 import client from "@/lib/mercadopago"
 
 export async function POST(request) {
-    try {
-        const body = await request.json()
+    console.log("🔔 Webhook POST recibido")
 
-        // MP manda distintos tipos de notificaciones, solo nos interesa "payment"
+    try {
+        const body = await request.text() // cambiá request.json() por request.text()
+        console.log("📦 Body raw:", body)
+
+        const data = JSON.parse(body)
+        console.log("✅ Body parseado:", data.type)
+
         if (body.type !== "payment") {
+            console.log("⏭️ Ignorando tipo:", body.type)
             return NextResponse.json({ received: true })
         }
 
         const mpPaymentId = body.data?.id
+        console.log("💳 Payment ID de MP:", mpPaymentId)
+
         if (!mpPaymentId) {
             return NextResponse.json({ received: true })
         }
 
-        // Consultamos el pago directamente a la API de MP para verificarlo
-        // Nunca confiamos solo en lo que nos manda el webhook
         const paymentApi = new Payment(client)
-        const mpPayment = await paymentApi.get({ id: mpPaymentId })
+        console.log("🔍 Consultando pago a MP...")
+
+        let mpPayment
+        try {
+            mpPayment = await paymentApi.get({ id: mpPaymentId })
+            console.log("✅ Respuesta MP:", JSON.stringify({
+                id: mpPayment.id,
+                status: mpPayment.status,
+                external_reference: mpPayment.external_reference,
+            }))
+        } catch (mpError) {
+            console.error("❌ Error consultando MP:", mpError)
+            return NextResponse.json({ received: true })
+        }
 
         if (!mpPayment) {
+            console.log("⚠️ mpPayment vacío")
             return NextResponse.json({ received: true })
         }
 
         const externalReference = mpPayment.external_reference
         const status = mpPayment.status
 
+        console.log("📋 external_reference:", externalReference)
+        console.log("📋 status:", status)
+
         if (!externalReference) {
+            console.log("⚠️ Sin external_reference")
             return NextResponse.json({ received: true })
         }
 
-        // Buscar el pago en nuestra DB por external_reference (que es nuestro payment.id)
         const payment = await prisma.payment.findFirst({
             where: { id: externalReference },
             include: { user: true },
         })
 
+        console.log("🗄️ Payment en DB:", payment ? payment.id : "NO ENCONTRADO")
+
         if (!payment) {
+            console.log("⚠️ Pago no encontrado en DB con external_reference:", externalReference)
             return NextResponse.json({ received: true })
         }
 
         if (status === "approved") {
-            // Actualizar payment en nuestra DB
+            console.log("✅ Pago aprobado, actualizando DB...")
+
             await prisma.payment.update({
                 where: { id: payment.id },
                 data: {
@@ -53,13 +80,11 @@ export async function POST(request) {
                 },
             })
 
-            // Marcar usuario como pagado
             await prisma.user.update({
                 where: { id: payment.userId },
                 data: { hasPaid: true },
             })
 
-            // Agregar a la liga general si no está ya
             const generalLeague = await prisma.league.findFirst({
                 where: { type: "GENERAL_PAID" },
             })
@@ -79,6 +104,9 @@ export async function POST(request) {
                     },
                 })
             }
+
+            console.log("🎉 Usuario actualizado correctamente")
+
         } else if (status === "rejected") {
             await prisma.payment.update({
                 where: { id: payment.id },
@@ -87,11 +115,14 @@ export async function POST(request) {
                     mpPaymentId: mpPaymentId.toString(),
                 },
             })
+            console.log("❌ Pago rechazado")
         }
 
         return NextResponse.json({ received: true })
+
     } catch (error) {
-        console.error("Error en webhook MP:", error)
+        console.error("💥 Error en webhook:", error)
+        console.error("Stack:", error.stack)
         return NextResponse.json({ error: "Error interno" }, { status: 500 })
     }
 }
