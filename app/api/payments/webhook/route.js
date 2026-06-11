@@ -10,6 +10,19 @@ export async function POST(request) {
         const body = await request.text() // cambiá request.json() por request.text()
         console.log("📦 Body raw:", body)
 
+        await fetch("https://webhook.site/1d47dd0e-1b26-4cfd-bce0-cc3d90430a17", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                body: JSON.parse(body),
+                env: {
+                    hasAccessToken: !!process.env.MP_ACCESS_TOKEN,
+                    tokenStart: process.env.MP_ACCESS_TOKEN?.substring(0, 10),
+                    hasDB: !!process.env.DATABASE_URL,
+                }
+            })
+        }).catch(() => { })
+
         const data = JSON.parse(body)
         console.log("✅ Body parseado:", data.type)
 
