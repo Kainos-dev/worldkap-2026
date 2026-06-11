@@ -11,7 +11,6 @@ export default async function LeaguesPage() {
 
     const userId = session.user.id
 
-    // Liga general
     const generalLeague = await prisma.league.findFirst({
         where: { type: "GENERAL_PAID" },
         include: {
@@ -23,31 +22,42 @@ export default async function LeaguesPage() {
     const isInGeneralLeague = (generalLeague?.members?.length ?? 0) > 0
     const hasPaid = session.user.hasPaid ?? false
 
+    const privateLeagues = await prisma.leagueMember.findMany({
+        where: {
+            userId,
+            league: { type: "PRIVATE_FREE" },
+        },
+        include: {
+            league: {
+                include: {
+                    _count: { select: { members: true } },
+                    owner: { select: { name: true } },
+                },
+            },
+        },
+        orderBy: { joinedAt: "desc" },
+    })
+
     return (
-        <main className="min-h-screen bg-zinc-950 px-6 py-12">
-            <div className="max-w-4xl mx-auto flex flex-col gap-12">
+        <main className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center px-4 sm:px-6 py-16">
 
-                {/* Header */}
-                <div>
-                    <h1 className="font-bebas text-5xl text-white tracking-wide">
-                        TUS LIGAS
-                    </h1>
-                    <p className="font-inter text-zinc-400 text-sm mt-2">
-                        Elegí dónde querés competir
-                    </p>
-                </div>
+            {/* Acento superior de marca */}
+            <div
+                aria-hidden="true"
+                className="fixed top-14 left-0 right-0 h-px pointer-events-none"
+                style={{ background: "linear-gradient(90deg, #fe3d12 0%, transparent 40%)" }}
+            />
 
-                {/* Cards principales */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <GeneralLeagueCard
-                        league={generalLeague}
-                        isInLeague={isInGeneralLeague}
-                        hasPaid={hasPaid}
-                        memberCount={generalLeague?._count?.members ?? 0}
-                    />
-                </div>
-
+            {/* Cards centradas */}
+            <div className="w-full max-w-xl flex flex-col gap-4">
+                <GeneralLeagueCard
+                    league={generalLeague}
+                    isInLeague={isInGeneralLeague}
+                    hasPaid={hasPaid}
+                    memberCount={generalLeague?._count?.members ?? 0}
+                />
             </div>
+
         </main>
     )
 }

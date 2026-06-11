@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { redirect, notFound } from "next/navigation"
 import LeagueTabs from "@/components/leagues/league/LeagueTabs"
+import CopyCodeButton from "@/components/leagues/league/Copycodebutton"
 
 export default async function LeaguePage({ params }) {
     const session = await auth()
@@ -10,7 +11,6 @@ export default async function LeaguePage({ params }) {
     const { id } = await params
     const userId = session.user.id
 
-    // Verificar que la liga existe
     const league = await prisma.league.findUnique({
         where: { id },
         include: {
@@ -21,7 +21,6 @@ export default async function LeaguePage({ params }) {
 
     if (!league) notFound()
 
-    // Verificar que el usuario es miembro
     const membership = await prisma.leagueMember.findUnique({
         where: {
             leagueId_userId: { leagueId: id, userId },
@@ -30,7 +29,6 @@ export default async function LeaguePage({ params }) {
 
     if (!membership) redirect("/leagues")
 
-    // Partidos con equipos
     const matches = await prisma.match.findMany({
         include: {
             homeTeam: true,
@@ -39,7 +37,6 @@ export default async function LeaguePage({ params }) {
         orderBy: { matchDate: "asc" },
     })
 
-    // Predicciones del usuario
     const predictionsRaw = await prisma.prediction.findMany({
         where: { userId },
     })
@@ -49,7 +46,6 @@ export default async function LeaguePage({ params }) {
         return acc
     }, {})
 
-    // Ranking de la liga
     const members = await prisma.leagueMember.findMany({
         where: { leagueId: id },
         include: {
@@ -63,7 +59,6 @@ export default async function LeaguePage({ params }) {
         },
     })
 
-    // Calcular puntos por miembro sumando sus predictions
     const memberIds = members.map((m) => m.userId)
 
     const pointsByUser = await prisma.prediction.groupBy({
@@ -88,24 +83,75 @@ export default async function LeaguePage({ params }) {
         .sort((a, b) => b.points - a.points)
         .map((m, i) => ({ ...m, position: i + 1 }))
 
+    const isPrivate = league.type === "PRIVATE_FREE"
+    const isGeneral = league.type === "GENERAL_PAID"
+
     return (
-        <main className="min-h-screen bg-zinc-950 px-4 py-10">
-            <div className="max-w-3xl mx-auto flex flex-col gap-8">
+        <main className="min-h-screen bg-zinc-950">
 
-                {/* Header */}
-                <div className="flex flex-col gap-1">
-                    <span className="font-inter text-xs text-zinc-500 tracking-widest uppercase">
-                        {league.type === "GENERAL_PAID" ? "Liga General" : "Liga Privada"}
-                    </span>
-                    <h1 className="font-bebas text-4xl text-white tracking-wide">
-                        {league.name.toUpperCase()}
-                    </h1>
-                    <p className="font-inter text-zinc-500 text-sm">
-                        {league._count.members} participantes
-                    </p>
-                </div>
+            {/* ── Franja de acento superior ─────────────────────────────── */}
+            <div
+                aria-hidden="true"
+                className="h-px w-full"
+                style={{ background: "linear-gradient(90deg, #fe3d12 0%, transparent 50%)" }}
+            />
 
-                {/* Tabs con toda la lógica */}
+            <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-14 flex flex-col gap-10">
+
+                {/* ── Header de la liga ─────────────────────────────────── */}
+                <header className="flex flex-col gap-4">
+
+                    {/* Badge de tipo */}
+                    <div className="flex items-center gap-3">
+                        <span
+                            className="inline-flex items-center font-sans text-[10px] font-medium tracking-[0.2em] uppercase px-2.5 py-1 rounded-full border"
+                            style={
+                                isGeneral
+                                    ? { color: "#fe3d12", borderColor: "#fe3d1230", background: "#fe3d1210" }
+                                    : { color: "#737373", borderColor: "#27272a", background: "transparent" }
+                            }
+                        >
+                            {isGeneral ? "Liga General" : "Liga Privada"}
+                        </span>
+
+                        {/* Código de invitación para ligas privadas */}
+                        {isPrivate && league.code && (
+                            <CopyCodeButton code={league.code} />
+                        )}
+                    </div>
+
+                    {/* Nombre */}
+                    <div className="flex flex-col gap-1">
+                        <h1 className="font-heading text-4xl sm:text-5xl text-white tracking-wide leading-none">
+                            {league.name.toUpperCase()}
+                        </h1>
+                    </div>
+
+                    {/* Meta-info */}
+                    <div className="flex items-center gap-4 flex-wrap">
+                        <div className="flex items-center gap-1.5">
+                            <span className="font-sans text-sm text-zinc-500">
+                                {league._count.members}
+                                <span className="text-zinc-700"> participantes</span>
+                            </span>
+                        </div>
+
+                        {league.owner?.name && (
+                            <>
+                                <div className="w-px h-3 bg-zinc-800" aria-hidden="true" />
+                                <span className="font-sans text-sm text-zinc-700">
+                                    Creada por{" "}
+                                    <span className="text-zinc-500">{league.owner.name}</span>
+                                </span>
+                            </>
+                        )}
+                    </div>
+
+                    {/* Divisor */}
+                    <div className="h-px bg-zinc-900 mt-2" aria-hidden="true" />
+                </header>
+
+                {/* ── Tabs ──────────────────────────────────────────────── */}
                 <LeagueTabs
                     matches={matches}
                     predictions={predictions}

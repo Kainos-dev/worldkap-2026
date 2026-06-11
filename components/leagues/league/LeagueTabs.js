@@ -57,25 +57,25 @@ export default function LeagueTabs({
             )}
 
             {activeTab === "info" && (
-                <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 flex flex-col gap-4">
-                    <h2 className="font-bebas text-2xl text-white tracking-wide">
+                <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 flex flex-col gap-4 font-sans">
+                    <h2 className="font-heading text-2xl text-white tracking-wide">
                         INFO DE LA LIGA
                     </h2>
                     <div className="flex flex-col gap-3">
                         <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
-                            <span className="font-inter text-sm text-zinc-400">Nombre</span>
-                            <span className="font-inter text-sm text-white">{league.name}</span>
+                            <span className="text-sm text-zinc-400">Nombre</span>
+                            <span className="text-sm text-white">{league.name}</span>
                         </div>
                         <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
-                            <span className="font-inter text-sm text-zinc-400">Tipo</span>
-                            <span className="font-inter text-sm text-white">
+                            <span className="text-sm text-zinc-400">Tipo</span>
+                            <span className="text-sm text-white">
                                 {league.type === "GENERAL_PAID" ? "Liga General · Paga" : "Liga Privada · Gratis"}
                             </span>
                         </div>
                         {league.type === "PRIVATE_FREE" && (
                             <div className="flex justify-between items-center">
-                                <span className="font-inter text-sm text-zinc-400">Código de invitación</span>
-                                <span className="font-bebas text-xl text-white tracking-widest">
+                                <span className="text-sm text-zinc-400">Código de invitación</span>
+                                <span className="font-headingtext-xl text-white tracking-widest">
                                     {league.code}
                                 </span>
                             </div>

@@ -1,9 +1,11 @@
 "use client"
 import Link from "next/link"
+import Image from "next/image"
+import worldKapLogo from "@/public/worldKap_logo.png"
 
 export default function Hero({ isLoggedIn }) {
     return (
-        <section className="relative min-h-[92vh] flex flex-col items-center justify-center overflow-hidden bg-zinc-950 px-6">
+        <section className="relative min-h-[92vh] flex flex-col items-center justify-center overflow-hidden bg-zinc-950 px-6 font-sans">
 
             {/* Campo de fútbol — líneas decorativas ultra-sutiles */}
             <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
@@ -24,6 +26,9 @@ export default function Hero({ isLoggedIn }) {
 
             <div className="relative z-10 flex flex-col items-center text-center gap-8 max-w-3xl w-full">
 
+                {/* Logo */}
+                
+
                 {/* Eyebrow */}
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-px bg-zinc-700" aria-hidden="true" />
@@ -34,13 +39,13 @@ export default function Hero({ isLoggedIn }) {
                 </div>
 
                 {/* Título principal */}
-                <div className="flex flex-col items-center gap-0">
-                    <h1 className="font-bebas leading-none text-white tracking-wide"
+                {/* <div className="flex flex-col items-center gap-0">
+                    <h1 className="font-heading leading-none text-white tracking-wide"
                         style={{ fontSize: "clamp(5rem, 14vw, 10rem)" }}>
                         PRODE
                     </h1>
                     <span
-                        className="font-bebas leading-none tracking-wide"
+                        className="font-heading leading-none tracking-wide"
                         style={{
                             fontSize: "clamp(5rem, 14vw, 10rem)",
                             color: "#fe3d12",
@@ -48,7 +53,18 @@ export default function Hero({ isLoggedIn }) {
                     >
                         MUNDIAL
                     </span>
-                </div>
+                </div> */}
+
+
+                {/* LOGO */}
+                <Image
+                    src={worldKapLogo}
+                    alt="WorldKap 2026"
+                    width={400}
+                    height={400}
+                    className="w-20 h-20 sm:w-125 sm:h-125 object-contain"
+                    priority // importante: está above the fold
+                />
 
                 {/* Descriptor */}
                 <p className="font-inter text-zinc-400 text-base sm:text-lg max-w-md leading-relaxed -mt-2">
@@ -57,10 +73,11 @@ export default function Hero({ isLoggedIn }) {
                 </p>
 
                 {/* CTAs */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full max-w-sm mt-1">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full max-w-sm sm:max-w-md mt-1">
                     <Link
                         href={isLoggedIn ? "/leagues" : "/login"}
-                        className="flex-1 font-inter font-semibold text-sm px-6 py-3.5 rounded-xl text-center transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#fe3d12]"
+                        className="flex-1 font-semibold text-sm px-6 py-3.5 rounded-xl text-center transition-all duration-200
+                        focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#fe3d12]"
                         style={{
                             background: "#fe3d12",
                             color: "#ffffff",
@@ -68,13 +85,16 @@ export default function Hero({ isLoggedIn }) {
                         onMouseEnter={e => e.currentTarget.style.background = "#e03510"}
                         onMouseLeave={e => e.currentTarget.style.background = "#fe3d12"}
                     >
-                        Jugar en la liga paga
+                        Liga General
                     </Link>
                     <Link
                         href={isLoggedIn ? "/leagues/private" : "/login"}
-                        className="flex-1 border border-zinc-700 hover:border-zinc-400 text-zinc-300 hover:text-white font-inter font-medium text-sm px-6 py-3.5 rounded-xl text-center transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                        className="
+                            flex-1 border border-zinc-700 hover:border-zinc-400 text-zinc-300 hover:text-whitefont-medium
+                            text-sm px-6 py-3.5 rounded-xl text-center transition-all duration-200
+                            focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                     >
-                        Jugar con amigos
+                        Ligas privadas
                     </Link>
                 </div>
 

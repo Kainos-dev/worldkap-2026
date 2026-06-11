@@ -31,7 +31,7 @@ function MatchRow({ match }) {
     const isAwayKnown = !!match.awayTeam
 
     return (
-        <div className="bg-zinc-900 border border-zinc-800/60 hover:border-zinc-700 rounded-xl px-4 py-4 sm:px-6 transition-colors duration-200">
+        <div className="bg-zinc-900 border border-zinc-800/60 hover:border-zinc-700 rounded-xl px-4 py-4 sm:px-6 transition-colors duration-200 font-sans">
 
             {/* Fila principal: equipos + VS */}
             <div className="flex items-center gap-3 sm:gap-4">
@@ -39,12 +39,12 @@ function MatchRow({ match }) {
                 {/* Badge de grupo/etapa */}
                 <div className="shrink-0 w-9 sm:w-10 text-center">
                     {match.group ? (
-                        <span className="font-bebas text-base text-zinc-500 leading-none">
+                        <span className="font-heading text-base text-zinc-500 leading-none">
                             G{match.group}
                         </span>
                     ) : isKnockout ? (
                         <span
-                            className="font-inter text-[9px] font-medium tracking-wide uppercase leading-tight block text-center"
+                            className="text-[9px] font-medium tracking-wide uppercase leading-tight block text-center"
                             style={{ color: "#fe3d12" }}
                         >
                             {STAGE_LABELS[match.stage]?.split(" ")[0] ?? "—"}
@@ -63,7 +63,7 @@ function MatchRow({ match }) {
                         />
                     )}
                     <span
-                        className={`font-inter text-sm font-medium truncate ${isHomeKnown ? "text-white" : "text-zinc-600 italic"
+                        className={`text-sm font-medium truncate ${isHomeKnown ? "text-white" : "text-zinc-600 italic"
                             }`}
                     >
                         {homeTeamName}
@@ -72,7 +72,7 @@ function MatchRow({ match }) {
 
                 {/* VS separator */}
                 <div className="shrink-0 flex flex-col items-center gap-0.5">
-                    <span className="font-bebas text-sm text-zinc-700 leading-none">VS</span>
+                    <span className="font-heading text-sm text-zinc-700 leading-none">VS</span>
                 </div>
 
                 {/* Equipo visitante */}
@@ -86,7 +86,7 @@ function MatchRow({ match }) {
                         />
                     )}
                     <span
-                        className={`font-inter text-sm font-medium truncate ${isAwayKnown ? "text-white" : "text-zinc-600 italic"
+                        className={`text-sm font-medium truncate ${isAwayKnown ? "text-white" : "text-zinc-600 italic"
                             }`}
                     >
                         {awayTeamName}
@@ -97,7 +97,7 @@ function MatchRow({ match }) {
                 <div className="hidden sm:block text-right shrink-0 ml-2">
                     <time
                         dateTime={match.matchDate}
-                        className="font-inter text-xs text-zinc-500"
+                        className="text-xs text-zinc-500"
                     >
                         {formatMatchDate(match.matchDate)}
                     </time>
@@ -110,7 +110,7 @@ function MatchRow({ match }) {
                 <div className="w-3 h-px bg-zinc-800" aria-hidden="true" />
                 <time
                     dateTime={match.matchDate}
-                    className="font-inter text-xs text-zinc-600"
+                    className="text-xs text-zinc-600"
                 >
                     {formatMatchDate(match.matchDate)}
                 </time>
@@ -126,21 +126,21 @@ export default function UpcomingMatches({ matches }) {
             <div className="max-w-3xl mx-auto flex flex-col gap-10">
 
                 {/* Header */}
-                <div className="flex items-end justify-between gap-4">
+                <div className="flex items-end justify-between gap-4 font-sans">
                     <div>
-                        <span className="font-inter text-xs tracking-[0.25em] text-zinc-600 uppercase block mb-3">
+                        <span className=" text-xs tracking-[0.25em] text-zinc-600 uppercase block mb-3">
                             Próximamente
                         </span>
-                        <h2 className="font-bebas text-5xl text-white tracking-wide leading-none">
+                        <h2 className="font-heading text-5xl text-white tracking-wide leading-none">
                             PRÓXIMOS PARTIDOS
                         </h2>
-                        <p className="font-inter text-zinc-600 text-xs mt-2">
+                        <p className="text-zinc-600 text-xs mt-2">
                             Horarios en tiempo argentino (UTC−3)
                         </p>
                     </div>
                     <Link
                         href="/matches"
-                        className="hidden sm:inline-flex items-center gap-1.5 font-inter text-xs text-zinc-500 hover:text-white transition-colors duration-200 shrink-0 pb-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white rounded"
+                        className="hidden sm:inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-white transition-colors duration-200 shrink-0 pb-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white rounded"
                     >
                         Ver todos
                         <span aria-hidden="true" className="text-base leading-none">→</span>
@@ -149,14 +149,14 @@ export default function UpcomingMatches({ matches }) {
 
                 {/* Lista de partidos */}
                 {matches.length === 0 ? (
-                    <div className="border border-zinc-900 rounded-xl py-16 flex flex-col items-center gap-3">
+                    <div className="borderborder-zinc-900 rounded-xl py-16 flex flex-col items-center gap-3">
                         <div
                             className="w-10 h-10 rounded-full flex items-center justify-center border border-zinc-800"
                             aria-hidden="true"
                         >
                             <span className="text-zinc-600 text-lg leading-none">⚽</span>
                         </div>
-                        <p className="font-inter text-zinc-600 text-sm">
+                        <p className=" text-zinc-600 text-sm">
                             No hay partidos programados todavía.
                         </p>
                     </div>
@@ -170,8 +170,8 @@ export default function UpcomingMatches({ matches }) {
 
                 {/* Link mobile */}
                 <Link
-                    href="/matches"
-                    className="sm:hidden font-inter text-sm text-zinc-500 hover:text-white transition-colors duration-200 text-center py-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white rounded"
+                    href="/leagues"
+                    className="sm:hidden text-sm text-zinc-500 hover:text-white transition-colors duration-200 text-center py-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white rounded"
                 >
                     Ver todos los partidos →
                 </Link>

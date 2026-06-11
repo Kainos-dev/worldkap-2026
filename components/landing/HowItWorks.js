@@ -18,7 +18,7 @@ export default function HowItWorks() {
     ]
 
     return (
-        <section className="bg-zinc-950 border-y border-zinc-900 py-24 px-6">
+        <section className="bg-zinc-950 border-y border-zinc-900 py-24 px-6 font-sans">
             <div className="max-w-4xl mx-auto flex flex-col gap-16">
 
                 {/* Header */}
@@ -27,7 +27,7 @@ export default function HowItWorks() {
                         <span className="font-inter text-xs tracking-[0.25em] text-zinc-600 uppercase block mb-3">
                             Cómo funciona
                         </span>
-                        <h2 className="font-bebas text-5xl text-white tracking-wide leading-none">
+                        <h2 className="font-heading text-5xl text-white tracking-wide leading-none">
                             SIMPLE DE JUGAR
                         </h2>
                     </div>
@@ -45,7 +45,7 @@ export default function HowItWorks() {
                         >
                             {/* Número decorativo */}
                             <span
-                                className="font-bebas leading-none select-none pointer-events-none"
+                                className="font-heading leading-none select-none pointer-events-none"
                                 style={{
                                     fontSize: "clamp(4rem, 8vw, 6rem)",
                                     color: "transparent",
@@ -58,7 +58,7 @@ export default function HowItWorks() {
 
                             {/* Contenido */}
                             <div className="flex flex-col gap-2">
-                                <h3 className="font-bebas text-2xl text-white tracking-wide">
+                                <h3 className="font-heading text-2xl text-white tracking-wide">
                                     {step.title}
                                 </h3>
                                 <p className="font-inter text-zinc-500 text-sm leading-relaxed">

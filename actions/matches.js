@@ -4,46 +4,12 @@ import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 
-// Verificación de admin reutilizable
 async function requireAdmin() {
     const session = await auth()
     if (!session?.user || session.user.role !== "ADMIN") {
         throw new Error("No autorizado")
     }
     return session
-}
-
-export async function createMatch(formData) {
-    await requireAdmin()
-
-    const homeTeam = formData.get("homeTeam")
-    const awayTeam = formData.get("awayTeam")
-    const matchDate = formData.get("matchDate")
-    const matchTime = formData.get("matchTime")
-    const group = formData.get("group")
-    const stage = formData.get("stage")
-
-    if (!homeTeam || !awayTeam || !matchDate || !matchTime) {
-        return { error: "Todos los campos son obligatorios" }
-    }
-
-    // Combinamos fecha y hora en un solo DateTime
-    const fullDate = new Date(`${matchDate}T${matchTime}:00`)
-
-    await prisma.match.create({
-        data: {
-            homeTeam,
-            awayTeam,
-            matchDate: fullDate,
-            group: group || null,
-            stage: stage || "GROUP",
-            status: "SCHEDULED",
-            predictionsOpen: true,
-        },
-    })
-
-    revalidatePath("/admin/matches")
-    return { success: true }
 }
 
 export async function updateMatchResult(matchId, homeScore, awayScore) {
@@ -55,11 +21,14 @@ export async function updateMatchResult(matchId, homeScore, awayScore) {
             homeScore: parseInt(homeScore),
             awayScore: parseInt(awayScore),
             status: "FINISHED",
-            predictionsOpen: false,
         },
     })
 
+    // Calcular puntos de todas las predicciones de este partido
+    await calculatePredictionPoints(matchId, parseInt(homeScore), parseInt(awayScore))
+
     revalidatePath("/admin/matches")
+    revalidatePath("/leagues")
     return { success: true }
 }
 
@@ -86,14 +55,36 @@ export async function deleteMatch(matchId) {
     return { success: true }
 }
 
-export async function togglePredictions(matchId, open) {
-    await requireAdmin()
-
-    await prisma.match.update({
-        where: { id: matchId },
-        data: { predictionsOpen: open },
+// Se llama automáticamente al cargar resultado
+async function calculatePredictionPoints(matchId, realHome, realAway) {
+    const predictions = await prisma.prediction.findMany({
+        where: { matchId, scored: false },
     })
 
-    revalidatePath("/admin/matches")
-    return { success: true }
+    const realResult = getResult(realHome, realAway)
+
+    for (const prediction of predictions) {
+        const predResult = getResult(prediction.homeGoals, prediction.awayGoals)
+        let points = 0
+
+        if (
+            prediction.homeGoals === realHome &&
+            prediction.awayGoals === realAway
+        ) {
+            points = 3 // Exacto
+        } else if (predResult === realResult) {
+            points = 1 // Resultado correcto, marcador incorrecto
+        }
+
+        await prisma.prediction.update({
+            where: { id: prediction.id },
+            data: { points, scored: true },
+        })
+    }
+}
+
+function getResult(home, away) {
+    if (home > away) return "HOME"
+    if (away > home) return "AWAY"
+    return "DRAW"
 }

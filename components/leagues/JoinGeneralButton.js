@@ -1,6 +1,9 @@
 "use client"
 import { useState } from "react"
 
+const BRAND = "#fe3d12"
+const ENTRY_AMOUNT = 5000
+
 export default function JoinGeneralButton() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
@@ -28,13 +31,18 @@ export default function JoinGeneralButton() {
             <button
                 onClick={handleClick}
                 disabled={loading}
-                className="w-full bg-white hover:bg-zinc-100 disabled:opacity-50 text-zinc-900 font-inter font-semibold text-sm py-3 rounded-xl transition-colors"
+                className="w-full font-sans font-bold text-sm py-3 rounded-xl transition-all duration-150
+                           text-center active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed
+                           focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 cursor-pointer"
+                style={{ background: BRAND, color: "#fff", outlineColor: BRAND }}
+                onMouseEnter={e => !loading && (e.currentTarget.style.background = "#e03510")}
+                onMouseLeave={e => (e.currentTarget.style.background = BRAND)}
             >
-                {loading ? "Redirigiendo..." : "Pagar $5.000 con Mercado Pago"}
+                {loading ? "Redirigiendo..." : `Apostar $${ENTRY_AMOUNT.toLocaleString("es-AR")} y entrar`}
             </button>
             {error && (
-                <p className="font-inter text-xs text-red-400 text-center">{error}</p>
+                <p className="font-sans text-xs text-red-400 text-center">{error}</p>
             )}
         </div>
     )
-}
+} 

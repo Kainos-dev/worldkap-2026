@@ -43,6 +43,22 @@ export async function createPrivateLeague(name) {
     const session = await auth()
     if (!session?.user) throw new Error("No autorizado")
 
+    const userId = session.user.id
+
+    // ← NUEVO: verificar si ya tiene una liga privada creada
+    const existingLeague = await prisma.league.findFirst({
+        where: {
+            ownerId: userId,
+            type: "PRIVATE_FREE",
+        },
+    })
+
+    if (existingLeague) {
+        return {
+            error: "Ya creaste una liga privada. Solo podés tener una.",
+        }
+    }
+
     const code = nanoid(8).toUpperCase()
 
     const league = await prisma.league.create({
