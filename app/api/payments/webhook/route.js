@@ -26,12 +26,12 @@ export async function POST(request) {
         const data = JSON.parse(body)
         console.log("✅ Body parseado:", data.type)
 
-        if (body.type !== "payment") {
-            console.log("⏭️ Ignorando tipo:", body.type)
+        if (data.type !== "payment") {
+            console.log("⏭️ Ignorando tipo:", data.type)
             return NextResponse.json({ received: true })
         }
 
-        const mpPaymentId = body.data?.id
+        const mpPaymentId = data.data?.id
         console.log("💳 Payment ID de MP:", mpPaymentId)
 
         if (!mpPaymentId) {
